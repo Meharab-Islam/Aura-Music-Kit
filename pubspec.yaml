@@ -1,7 +1,7 @@
 name: aura_music_kit
 description: A professional Flutter plugin to query local device music, manage playlists, and apply audio effects on Android and iOS.
 version: 1.1.1
-homepage: https://github.com/your_username/aura_music_kit # Replace with your repository URL
+homepage: https://github.com/Meharab-Islam/Aura-Music-Kit.git # Replace with your repository URL
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
