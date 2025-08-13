@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.1] - 2025-08-13
+## [1.1.1] - 2025-08-13
 ### Added
 - Initial release of **Aura Music Kit**.
 - Support for fetching all local audio files from Android and iOS devices.
