@@ -1,44 +1,48 @@
+Got it — you basically want this `Aura Music Kit` README rewritten so it’s cleaner, more professional, and consistent in formatting while keeping all the functionality intact.
+I can reorganize the sections, improve clarity, and make the examples more concise while keeping them complete.
+
+Here’s the polished and professional rewrite:
+
+---
+
 # Aura Music Kit
 
-[![pub version](https://img.shields.io/pub/v/aura_music_kit?color=5c3c8b&style=for-the-badge)](https://pub.dev/packages/aura_music_kit)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](/LICENSE)
-![platforms](https://img.shields.io/badge/platforms-android%20%7C%20ios-lightgrey.svg?style=for-the-badge)
+[![Pub Version](https://img.shields.io/pub/v/aura_music_kit?color=5c3c8b\&style=for-the-badge)](https://pub.dev/packages/aura_music_kit)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](/LICENSE)
+![Platforms](https://img.shields.io/badge/platforms-android%20%7C%20ios-lightgrey.svg?style=for-the-badge)
 
-A powerful and easy-to-use Flutter plugin for accessing local audio files on a user's device. Aura Music Kit simplifies fetching songs, retrieving metadata, and handling platform-specific permissions, making it the perfect starting point for your music player app.
-
-
+A powerful Flutter plugin for accessing local audio files, retrieving metadata, and handling platform-specific permissions.
+Perfect for building music player apps without the hassle of writing native code.
 
 ---
 
 ## ✨ Features
 
-- ✅ **Fetch All Songs**: Query all audio files from the device's media library.
-- 🖼️ **Album Artwork**: Retrieve embedded album artwork for each song.
-- 🎵 **Rich Metadata**: Access essential song details including title, artist, album, duration, and file path.
-- 🔒 **Simplified Permissions**: Handles the complexity of requesting storage/media permissions on both Android and iOS.
-- 📱 **Platform-Specific Logic**: Automatically uses the correct permissions for various Android API levels (`READ_EXTERNAL_STORAGE` for older versions and `READ_MEDIA_AUDIO` for Android 13+).
+* **Fetch All Songs** — Query audio files from the device’s media library.
+* **Album Artwork** — Retrieve embedded album covers for each track.
+* **Rich Metadata** — Title, artist, album, duration, file path, and more.
+* **Permission Handling** — Automatically requests the right permissions for Android/iOS.
+* **API-Level Awareness** — Uses `READ_MEDIA_AUDIO` for Android 13+, `READ_EXTERNAL_STORAGE` for older devices.
 
 ---
 
-## ⚙️ Platform Configuration
+## ⚙️ Platform Setup
 
-Before you begin, add the required permissions to your project's native configuration files.
+### **Android**
 
-### Android
-
-Add the following permissions to your `android/app/src/main/AndroidManifest.xml` file.
+Add permissions to `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
-<!-- For Android 12 and below -->
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<!-- Android 12 and below -->
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-<!-- For Android 13 and above -->
+<!-- Android 13+ -->
 <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 ```
 
-### iOS
+### **iOS**
 
-Add the `NSAppleMusicUsageDescription` key to your `ios/Runner/Info.plist` file. This is required by Apple to explain why your app needs access to the user's media library.
+Add the `NSAppleMusicUsageDescription` key to `ios/Runner/Info.plist`:
 
 ```xml
 <key>NSAppleMusicUsageDescription</key>
@@ -47,25 +51,27 @@ Add the `NSAppleMusicUsageDescription` key to your `ios/Runner/Info.plist` file.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
-### 1. Installation
-
-Add `aura_music_kit` to your `pubspec.yaml` file. It's also recommended to include `permission_handler` and `device_info_plus` for a complete setup.
+Add dependencies in `pubspec.yaml`:
 
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  aura_music_kit: ^1.0.0 # Use the latest version
-  permission_handler: ^11.0.0 # Recommended for handling permissions
-  device_info_plus: ^9.0.0 # Recommended for checking device info
-  just_audio: ^0.9.36 # Recommended for audio playback and effects
+  aura_music_kit: ^1.0.0
+  permission_handler: ^11.0.0
+  device_info_plus: ^9.0.0
+  just_audio: ^0.9.36
 ```
 
-Then, run `flutter pub get` in your terminal to install the packages.
+Run:
 
-### 2. Import the necessary packages
+```bash
+flutter pub get
+```
+
+Import:
 
 ```dart
 import 'dart:io';
@@ -77,76 +83,47 @@ import 'package:aura_music_kit/aura_music_kit.dart';
 
 ---
 
-## 📋 How to Use
+## 📋 Usage
 
-Here’s a step-by-step guide to using Aura Music Kit in your Flutter application.
-
-### Step 1: Check and Request Permissions
-
-Before fetching music, you must have the user's permission. The required permission varies by platform and Android SDK version.
+### **1. Handle Permissions**
 
 ```dart
-/// Gets the appropriate permission status.
 Future<PermissionStatus> _getPermission() async {
   if (Platform.isAndroid) {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    // For Android 13 (SDK 33) and above, use READ_MEDIA_AUDIO
-    if (androidInfo.version.sdkInt >= 33) {
-      return Permission.audio.status;
-    } else {
-      // For older versions, use READ_EXTERNAL_STORAGE
-      return Permission.storage.status;
-    }
-  } else {
-    // For iOS, use mediaLibrary
-    return Permission.mediaLibrary.status;
+    final sdkInt = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+    return sdkInt >= 33 ? Permission.audio.status : Permission.storage.status;
   }
+  return Permission.mediaLibrary.status;
 }
 
-/// Requests the appropriate permission from the user.
 Future<void> _requestPermission() async {
   PermissionStatus status;
-   if (Platform.isAndroid) {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt >= 33) {
-      status = await Permission.audio.request();
-    } else {
-      status = await Permission.storage.request();
-    }
+  if (Platform.isAndroid) {
+    final sdkInt = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+    status = sdkInt >= 33
+        ? await Permission.audio.request()
+        : await Permission.storage.request();
   } else {
     status = await Permission.mediaLibrary.request();
   }
 
-  // Handle the permission response
   if (status.isGranted) {
-    // Permission granted, you can now fetch music
     _fetchMusic();
   } else {
-    // Permission denied
-    // You might want to show a dialog to the user
+    // Handle denial
   }
 }
 ```
 
-### Step 2: Fetch Music Files
-
-Once permission is granted, call `AuraMusicKit.getMusicFiles()` to get a list of all songs on the device.
+### **2. Fetch Music Files**
 
 ```dart
 List<Song> _songs = [];
 bool _isLoading = true;
 
 Future<void> _fetchMusic() async {
-  // Ensure permission is granted before fetching
-  final status = await _getPermission();
-  if (!status.isGranted) {
-    print('Permission not granted.');
-    return;
-  }
-
-  // Fetch the list of songs
+  if (!(await _getPermission()).isGranted) return;
   final fetchedSongs = await AuraMusicKit.getMusicFiles();
-
   setState(() {
     _songs = fetchedSongs;
     _isLoading = false;
@@ -154,9 +131,7 @@ Future<void> _fetchMusic() async {
 }
 ```
 
-### Step 3: Display the Music List
-
-You can display the fetched songs in a `ListView`. The `Song` object contains the artwork as a `Uint8List`, which can be displayed using `Image.memory`.
+### **3. Display Song List**
 
 ```dart
 ListView.builder(
@@ -165,79 +140,47 @@ ListView.builder(
     final song = _songs[index];
     return ListTile(
       leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(8),
         child: SizedBox(
           width: 50,
           height: 50,
           child: song.artwork != null
-              ? Image.memory(
-                  song.artwork!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.music_note, size: 30),
-                )
+              ? Image.memory(song.artwork!, fit: BoxFit.cover)
               : const Icon(Icons.music_note, size: 30),
         ),
       ),
-      title: Text(
-        song.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
-      subtitle: Text(
-        song.artist ?? "Unknown Artist",
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(song.artist ?? "Unknown Artist",
+          maxLines: 1, overflow: TextOverflow.ellipsis),
       onTap: () {
-        // Navigate to your player screen
-        // Example: Navigator.push(context, MaterialPageRoute(...));
+        // Navigate to player
       },
     );
   },
 );
 ```
 
-
 ---
 
-## 🎛️ Advanced Usage: Adding an Equalizer
+## 🎛 Equalizer Integration (Android)
 
-While `aura_music_kit` fetches your music, you'll need a playback library like `just_audio` to play songs and apply effects like an equalizer.
-
-### Step 1: Set up the Audio Player with an Equalizer
-
-In your player screen's state, create instances of `AudioPlayer` and `AndroidEqualizer`.
+### **Player Setup**
 
 ```dart
-class PlayerScreen extends StatefulWidget {
-  // ...
-}
+final _equalizer = AndroidEqualizer();
+late AudioPlayer _audioPlayer;
 
-class _PlayerScreenState extends State<PlayerScreen> {
-  final _equalizer = AndroidEqualizer();
-  late AudioPlayer _audioPlayer;
-
-  @override
-  void initState() {
-    super.initState();
-    _audioPlayer = AudioPlayer(
-      audioPipeline: AudioPipeline(
-        androidAudioEffects: [_equalizer],
-      ),
-    );
-    // ... load song etc.
-  }
-  // ...
+@override
+void initState() {
+  super.initState();
+  _audioPlayer = AudioPlayer(
+    audioPipeline: AudioPipeline(androidAudioEffects: [_equalizer]),
+  );
 }
 ```
 
-### Step 2: Create an Equalizer Control UI
+### **Equalizer UI**
 
-On your player screen, add a button that navigates to a new screen for equalizer controls. Pass the `_equalizer` instance to it.
-
-**Player Screen:**
 ```dart
 IconButton(
   icon: const Icon(Icons.equalizer),
@@ -249,19 +192,14 @@ IconButton(
       ),
     );
   },
-),
+);
 ```
 
-**Equalizer Screen:**
-This new screen will contain the sliders to control the equalizer bands.
+**EqualizerScreen:**
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-
 class EqualizerScreen extends StatefulWidget {
   final AndroidEqualizer equalizer;
-
   const EqualizerScreen({super.key, required this.equalizer});
 
   @override
@@ -269,7 +207,7 @@ class EqualizerScreen extends StatefulWidget {
 }
 
 class _EqualizerScreenState extends State<EqualizerScreen> {
-  late bool _isEnabled;
+  bool _isEnabled = false;
 
   @override
   void initState() {
@@ -286,10 +224,10 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
           SwitchListTile(
             title: const Text('Enable Equalizer'),
             value: _isEnabled,
-            onChanged: (value) {
+            onChanged: (v) {
               setState(() {
-                _isEnabled = value;
-                widget.equalizer.setEnabled(value);
+                _isEnabled = v;
+                widget.equalizer.setEnabled(v);
               });
             },
           ),
@@ -297,29 +235,31 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
             child: FutureBuilder<AndroidEqualizerParameters>(
               future: widget.equalizer.parameters,
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 final params = snapshot.data!;
-                return ListView.builder(
-                  itemCount: params.bands.length,
-                  itemBuilder: (context, index) {
-                    final band = params.bands[index];
+                return ListView(
+                  children: params.bands.map((band) {
                     return Column(
                       children: [
                         Text('${band.centerFrequency.round()} Hz'),
                         StreamBuilder<double>(
                           stream: band.gainStream,
-                          builder: (context, snapshot) {
+                          builder: (context, snap) {
                             return Slider(
                               min: params.minDecibels,
                               max: params.maxDecibels,
-                              value: snapshot.data ?? band.gain,
-                              onChanged: !_isEnabled ? null : (v) => band.setGain(v),
+                              value: snap.data ?? band.gain,
+                              onChanged: !_isEnabled
+                                  ? null
+                                  : (v) => band.setGain(v),
                             );
                           },
                         ),
                       ],
                     );
-                  },
+                  }).toList(),
                 );
               },
             ),
@@ -333,37 +273,37 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
 
 ---
 
-## 📚 API Reference
+## 📚 API
 
 ### `AuraMusicKit`
 
-| Method              | Description                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| `getMusicFiles()`   | Asynchronously fetches a list of all audio files from the device. Returns a `Future<List<Song>>`. |
+| Method            | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `getMusicFiles()` | Fetches a list of `Song` objects from the device. |
 
-### `Song` Class
+### `Song`
 
-A data class representing a single audio file with the following properties:
-
-| Property   | Type         | Description                                     |
-| :--------- | :----------- | :---------------------------------------------- |
-| `title`    | `String`     | The title of the song.                          |
-| `artist`   | `String?`    | The artist of the song. Can be null.            |
-| `album`    | `String?`    | The album the song belongs to. Can be null.     |
-| `data`     | `String`     | The absolute file path to the audio file.       |
-| `artwork`  | `Uint8List?` | The embedded album artwork as a byte list.      |
-| `duration` | `int?`       | The duration of the song in milliseconds.       |
+| Property   | Type         | Description   |
+| ---------- | ------------ | ------------- |
+| `title`    | `String`     | Song title    |
+| `artist`   | `String?`    | Song artist   |
+| `album`    | `String?`    | Album name    |
+| `data`     | `String`     | File path     |
+| `artwork`  | `Uint8List?` | Album cover   |
+| `duration` | `int?`       | Duration (ms) |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you find a bug or have a feature request, please open an issue on our [GitHub repository](https://github.com/your-username/aura_music_kit). If you would like to contribute code, please fork the repository and submit a pull request.
-
-## 📄 License
-
-This package is licensed under the MIT License. See the `LICENSE` file for more details.
+Found a bug? Want to add a feature?
+Open an issue or submit a PR on [GitHub](https://github.com/Meharab-Islam/Aura-Music-Kit.git).
 
 ---
 
-> This video provides a great overview of creating a complete [Flutter Music App](https://www.youtube.com/watch?v=LMBNDKxXuDU), which is relevant to anyone using this package.
+## 📄 License
+
+Licensed under the [MIT License](LICENSE).
+
+---
+
